@@ -1,50 +1,83 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+import argparse
 import os
 from pathlib import Path
 import requests
 import shutil
-import sys
 import subprocess
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-def resolve_executable_path(command_or_path):
-    """Returns the absolute path of an executable."""
-    if command_or_path and command_or_path.strip():
-        executable_path = shutil.which(command_or_path)
-        if executable_path is None:
-            raise ("Failed to resolve executable path for "
-                             "'{}'.".format(command_or_path))
-        return os.path.abspath(executable_path)
-    else:
-        return None
+class BuildHelper():
+    def __init__(self, build_path, package_url):
+        self.SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+        self.BUILD_DIR = os.path.join(self.SCRIPT_DIR, build_path)
+        self.PACKAGE_DIR = os.path.join(self.BUILD_DIR, "ort_package")
+        self.PACKAGE_PATH = os.path.join(self.PACKAGE_DIR, "ort.zip")
 
-clean = False
+        self.make_directory(self.BUILD_DIR, self.PACKAGE_DIR)
+        self.download_package_from_url(package_url)
+        self.execute_cmake()
+
+    def resolve_executable_path(self, command_or_path):
+        if command_or_path and command_or_path.strip():
+            executable_path = shutil.which(command_or_path)
+            if executable_path is None:
+                raise ("Failed to resolve executable path for "
+                       "'{}'.".format(command_or_path))
+            return os.path.abspath(executable_path)
+        else:
+            return None
+
+    def execute_cmake(self):
+        cmake_path = self.resolve_executable_path("cmake")
+
+        subprocess.run([cmake_path, ".."], cwd=self.BUILD_DIR)
+        subprocess.run([cmake_path, "--build", "."], cwd=self.BUILD_DIR)
+
+    def make_directory(self, *paths):
+        [Path(path).mkdir(parents=True, exist_ok=True) for path in paths]
+
+    def download_package_from_url(self, url):
+        try:
+            print("downloading onnxruntime package from", url)
+            r = requests.get(url, allow_redirects=True)
+        except requests.exceptions.RequestException as e:
+            raise SystemExit(e)
+
+        open(self.PACKAGE_PATH, 'wb').write(r.content)
+        shutil.unpack_archive(self.PACKAGE_PATH, self.PACKAGE_DIR)
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--build_path",
+        required=False,
+        nargs=1,
+        type=str,
+        default='build',
+        help="Specify build path.")
+
+    parser.add_argument(
+        "--package_url",
+        required=False,
+        nargs=1,
+        type=str,
+        default=
+        'https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime.Gpu/1.8.1',
+        help="Onnxruntime release nuget package download link.")
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    args = parse_arguments()
+    BuildHelper(args.build_path, args.package_url)
+
 
 if __name__ == "__main__":
-
-    if clean:
-        print(resolve_executable_path('cmake'))
-        #shutil.rmtree(SCRIPT_DIR + "/package")
-        #shutil.rmtree(SCRIPT_DIR + "/build")
-        sys.exit(0)
-
-    # different os?
-    Path(SCRIPT_DIR + "/build").mkdir(parents=True, exist_ok=True)
-    Path(SCRIPT_DIR + "/build" + "/ort_package").mkdir(parents=True, exist_ok=True)
-
-    url = 'https://www.nuget.org/api/v2/package/Microsoft.ML.OnnxRuntime.Gpu/1.8.1'
-    print("Downloading Onnxruntime package from", url, "...")
-    r = requests.get(url, allow_redirects=True)
-
-    pkg_path = Path(SCRIPT_DIR + "/build" + '/ort_package' + '/ort.zip')
-    open(pkg_path, 'wb').write(r.content)
-    print("Unpacking Onnxruntime package ...")
-    shutil.unpack_archive(pkg_path, pkg_path.parent.absolute())
-
-    cmake_path = resolve_executable_path("cmake")
-
-    subprocess.run([cmake_path, ".."], cwd = SCRIPT_DIR + "/build")
-    subprocess.run([cmake_path, "--build", "."], cwd = SCRIPT_DIR + "/build")
+    main()
