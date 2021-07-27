@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.18)
 project(CustomOpDLib LANGUAGES CXX CUDA)
 
 set(CUSTOMOPLIB_ROOT ${PROJECT_SOURCE_DIR}/custom_op_library)
-set(ORTPACKAGE_ROOT ${PROJECT_SOURCE_DIR}/build/ort_package)
+set(ORTPACKAGE_ROOT ${CMAKE_CURRENT_BINARY_DIR}/ort_package)
 set(ORTPACKAGE_INCLUDE ${ORTPACKAGE_ROOT}/build/native/include)
 set(ORT_HEADER_SRC
     "${ORTPACKAGE_INCLUDE}/onnxruntime_c_api.h"
@@ -25,21 +25,27 @@ file(GLOB CUSTOMOPLIB_SRC
 file(COPY ${ORT_HEADER_SRC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CUSTOMOPLIB_SRC} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+file(GLOB CUSTOMOPIMPL_SRC
+     "${CMAKE_CURRENT_BINARY_DIR}/sequence_pooling.h"
+     "${CMAKE_CURRENT_BINARY_DIR}/sequence_pooling.cu")
+
 find_package(CUDA REQUIRED)
 include_directories("${CUDA_INCLUDE_DIRS}")
 
 add_library(custom_op_library_fp32 SHARED
-  ${CUSTOMOPLIB_ROOT}/custom_op_library_fp32.cc
-  ${CUSTOMOPLIB_ROOT}/sequence_pooling.h
-  ${CUSTOMOPLIB_ROOT}/sequence_pooling.cu)
+  ${CMAKE_CURRENT_BINARY_DIR}/custom_op_library_fp32.cc
+  ${CUSTOMOPIMPL_SRC}
+)
 
 add_library(custom_op_library_fp16 SHARED
-  ${CUSTOMOPLIB_ROOT}/custom_op_library_fp16.cc
-  ${CUSTOMOPLIB_ROOT}/sequence_pooling.h
-  ${CUSTOMOPLIB_ROOT}/sequence_pooling.cu)
+  ${CMAKE_CURRENT_BINARY_DIR}/custom_op_library_fp16.cc
+  ${CUSTOMOPIMPL_SRC}
+)
 
-set_target_properties(custom_op_library_fp32 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(custom_op_library_fp16 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(
+  custom_op_library_fp32 custom_op_library_fp16
+  PROPERTIES CUDA_SEPARABLE_COMPILATION ON
+)
 
 if(UNIX)
   if (APPLE)
@@ -52,5 +58,7 @@ else()
   set(ONNXRUNTIME_CUSTOM_OP_LIB_LINK_FLAG "-DEF:${CUSTOMOPLIB_ROOT}/custom_op_library.def")
 endif()
 
-set_property(TARGET custom_op_library_fp32 APPEND_STRING PROPERTY LINK_FLAGS ${ONNXRUNTIME_CUSTOM_OP_LIB_LINK_FLAG})
-set_property(TARGET custom_op_library_fp16 APPEND_STRING PROPERTY LINK_FLAGS ${ONNXRUNTIME_CUSTOM_OP_LIB_LINK_FLAG})
+set_property(
+  TARGET custom_op_library_fp32 custom_op_library_fp16
+  APPEND_STRING PROPERTY LINK_FLAGS ${ONNXRUNTIME_CUSTOM_OP_LIB_LINK_FLAG}
+)
