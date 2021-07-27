@@ -73,7 +73,6 @@ __global__ void SequencePoolingCudaKernel(const T* input, const int64_t* sentenc
 
 }
 
-//template <typename T>
 void SequencePoolingCuda(
   const int batch_size,
   const int hidden_size,
@@ -106,44 +105,4 @@ void SequencePoolingCuda(
   cudaDeviceSynchronize();
 }
 
-
-//template void SequencePoolingCuda(const int, const int, const int, const int, const float*, const int64_t*, float*);
-//template void SequencePoolingCuda(const int, const int, const int, const int, const half*, const int64_t*, half*);
-
-//bool LaunchSequencePoolingKernel(
-//  void* output,
-//  const void* input,
-//  const void* sentence_lengthes,
-//  const int batch_size,
-//  const int hidden_size,
-//  const int num_sequences,
-//  const int sequence_length_for_split,
-//  const size_t element_size) {
-//  // use default stream
-//  const cudaStream_t stream = nullptr;
-//
-//  if (element_size == 2) {
-//    return SequencePooling<half>(
-//      stream,
-//      batch_size,
-//      hidden_size,
-//      num_sequences,
-//      sequence_length_for_split,
-//      reinterpret_cast<const half*>(input),
-//      reinterpret_cast<const int64_t*>(sentence_lengthes),
-//      reinterpret_cast<half*>(output)
-//    );
-//  } else {
-//    return SequencePooling<float>(
-//      stream,
-//      batch_size,
-//      hidden_size,
-//      num_sequences,
-//      sequence_length_for_split,
-//      reinterpret_cast<const float*>(input),
-//      reinterpret_cast<const int64_t*>(sentence_lengthes),
-//      reinterpret_cast<float*>(output)
-//    );
-//  }
-//}
 
