@@ -14,5 +14,5 @@
 
 
 ## Artifacts
-- SequencePooling: [cpu](https://github.com/wangyems/OrtCustomOpDynamicLibrary/tree/main/artifacts/Turing-Longformer/SequencePooling/cpu),
-                   [cuda](https://github.com/wangyems/OrtCustomOpDynamicLibrary/tree/main/artifacts/Turing-Longformer/SequencePooling/cuda)
+- SequencePooling: [cpu](https://github.com/wangyems/OrtCustomOpDynamicLibrary/tree/v1.0/artifacts/Turing-Longformer/SequencePooling/cpu),
+                   [cuda](https://github.com/wangyems/OrtCustomOpDynamicLibrary/tree/v1.0/artifacts/Turing-Longformer/SequencePooling/cuda)
