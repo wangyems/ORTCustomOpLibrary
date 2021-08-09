@@ -1,1 +1,1 @@
-*This is not auto generated. The files may be outdated*
+*This is not auto generated. The files may be outdated.*
