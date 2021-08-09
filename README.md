@@ -1,4 +1,4 @@
-# OrtCustomOpDynamicLibrary
+# ORTCustomOpLibrary
 
 **A standalone code repository to generate dynamic library files for custom OnnxRuntime operators**.
 
