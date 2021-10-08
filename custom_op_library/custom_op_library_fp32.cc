@@ -72,7 +72,10 @@ struct SequencePoolingKernel {
     OrtTensorTypeAndShapeInfo* output_info = ort_.GetTensorTypeAndShape(output);
     ort_.ReleaseTensorTypeAndShapeInfo(output_info);
 
-    SequencePoolingCuda(batch_size,
+    cudaStream_t stream = reinterpret_cast<cudaStream_t>(ort_.KernelContext_GetCUDAStream(context));
+
+    SequencePoolingCuda(stream,
+                        batch_size,
                         hidden_size,
                         num_sequences,
                         sequence_length_for_split,

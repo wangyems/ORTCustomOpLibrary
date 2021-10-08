@@ -74,35 +74,37 @@ __global__ void SequencePoolingCudaKernel(const T* input, const int64_t* sentenc
 }
 
 void SequencePoolingCuda(
+  cudaStream_t stream,
   const int batch_size,
   const int hidden_size,
   const int num_sequences,
   const int sequence_length_for_split,
   const float* input,
   const int64_t* sentence_lengthes,
-  float* output) {
+  float* output) 
+{
   const int num_sequences_max = 256;
   const dim3 grid(batch_size, 1, hidden_size);
   const dim3 block(num_sequences_max, 1, 1);
-  cudaDeviceSynchronize();
-  SequencePoolingCudaKernel<float><<<grid, block, 0, 0>>>(input, sentence_lengthes, num_sequences, sequence_length_for_split, output);
-  cudaDeviceSynchronize();
+  
+  SequencePoolingCudaKernel<float><<<grid, block, 0, stream>>>(input, sentence_lengthes, num_sequences, sequence_length_for_split, output);
 }
 
 void SequencePoolingCuda(
+  cudaStream_t stream,
   const int batch_size,
   const int hidden_size,
   const int num_sequences,
   const int sequence_length_for_split,
   const half* input,
   const int64_t* sentence_lengthes,
-  half* output) {
+  half* output) 
+{
   const int num_sequences_max = 256;
   const dim3 grid(batch_size, 1, hidden_size);
   const dim3 block(num_sequences_max, 1, 1);
-  cudaDeviceSynchronize();
-  SequencePoolingCudaKernel<half><<<grid, block, 0, 0>>>(input, sentence_lengthes, num_sequences, sequence_length_for_split, output);
-  cudaDeviceSynchronize();
+
+  SequencePoolingCudaKernel<half><<<grid, block, 0, stream>>>(input, sentence_lengthes, num_sequences, sequence_length_for_split, output);
 }
 
 

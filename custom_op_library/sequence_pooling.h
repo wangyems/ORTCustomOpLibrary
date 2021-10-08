@@ -3,8 +3,10 @@
 
 using namespace std;
 #include <cuda_fp16.h>
+#include <cuda_runtime.h>
 
 void SequencePoolingCuda(
+  cudaStream_t stream,
   const int batch_size,
   const int hidden_size,
   const int num_sequences,
@@ -14,6 +16,7 @@ void SequencePoolingCuda(
   float* output);
 
 void SequencePoolingCuda(
+  cudaStream_t stream,
   const int batch_size,
   const int hidden_size,
   const int num_sequences,
