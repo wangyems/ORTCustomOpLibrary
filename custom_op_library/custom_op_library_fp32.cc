@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <mutex>
+#include <stdexcept>
 
 #include "sequence_pooling.h"
 
@@ -62,6 +63,10 @@ struct SequencePoolingKernel {
     int hidden_size = static_cast<int>(input_dim[2]);
     int num_sequences = static_cast<int>(senlens_dim[1]);
     int sequence_length_for_split = static_cast<int>(input_dim[1]);
+
+    if (num_sequences != 256) {
+      throw std::invalid_argument( "sen_lens needs padding to 256" );
+    }
 
     std::vector<int64_t> output_dims = input_dim;
     output_dims[1] = 256;
