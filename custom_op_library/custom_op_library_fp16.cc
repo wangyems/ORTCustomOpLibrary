@@ -74,7 +74,7 @@ struct SequencePoolingKernel16 {
     OrtTensorTypeAndShapeInfo* output_info = ort_.GetTensorTypeAndShape(output);
     ort_.ReleaseTensorTypeAndShapeInfo(output_info);
 
-    cudaStream_t stream = reinterpret_cast<cudaStream_t>(ort_.KernelContext_GetCUDAStream(context));
+    cudaStream_t stream = reinterpret_cast<cudaStream_t>(ort_.KernelContext_GetGPUComputeStream(context));
 
     // Do computation
     SequencePoolingCuda(stream,
